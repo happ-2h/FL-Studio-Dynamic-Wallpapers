@@ -27,7 +27,7 @@
 - Download individual wallpapers: `right-click (index.html) > Save link as...`
   - I recommend putting them in individual folders, especially if they require images, else rename them if you plan on downloading more, or just to distinguish them.
   - If you want to download one pack, this is the way to do it.
-- Download all packs: on the [main repository link](), click the <kbd>Code</kbd> button > **Download ZIP**.
+- Download all packs: on the [main repository link](https://github.com/happ-2h/FL-Studio-Dynamic-Wallpapers), click the <kbd>Code</kbd> button > **Download ZIP**.
 - You can also `git clone` if you use Git.
 
 ### Save Path
