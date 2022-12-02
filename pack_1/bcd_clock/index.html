@@ -1,0 +1,213 @@
+<!--
+  Author:  happx https://github.com/happ-2h
+  Date:    2022 November 30
+  Purpose: FL Studio dynamic wallpaper - BCD Clock v1.0.0
+  
+                Copyright conditions
+
+  > You are free to modify the software to your liking.
+  > Redistribute if it has been modified and signed off by the new author,
+    or the software is no longer available by the original author (Copyleft | Abandonware).
+  > Credits to the original author (on any medium or modification) are appreciated but not required.
+    If it has been modified, it is no longer associated with the original author (credits optional).
+  > Free. Not for or part of commercial use.
+-->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+    <meta name="author" content="happx">
+    <meta name="id" content="https://github.com/happ-2h">
+    <meta name="description" content="FL Studio dynamic wallpaper - BCD Clock">
+
+    <style>
+      * {
+        margin:          0;
+        padding:         0;
+        box-sizing:      border-box;
+        -ms-user-select: none;
+        user-select:     none;
+        overflow:        hidden;
+      }
+
+      body {
+        width:  100vw;
+        height: 100vh;
+
+        /*
+          Change the background color using these formats
+          https://developer.mozilla.org/en-US/docs/Web/CSS/background-color
+         */
+        background: #222;
+      }
+
+      #clock-container {
+        width:           80vw;
+        height:          90vh;
+        display:         flex;
+        justify-content: center;
+        align-items:     center;
+        margin:          auto;
+      }
+
+      #hours,
+      #minutes,
+      #seconds {
+        display:         flex;
+        justify-content: center;
+        align-items:     baseline;
+      }
+
+      .bit {
+        width:           32px;
+        height:          32px;
+        border-radius:   50%;
+        margin:          1rem;
+
+        /* 
+          Small delay when turning on and off 
+
+          Change the timing function ("ease-in")
+          or time ("0.1s"). Time change may cause inaccurate time display on clock.
+          https://developer.mozilla.org/en-US/docs/Web/CSS/transition-timing-function
+        */
+        transition: all 0.1s ease-in;
+
+        /*
+          Change the inactive LED color using these formats
+          https://developer.mozilla.org/en-US/docs/Web/CSS/background-color
+         */
+        background-color: rgb(73, 70, 70);
+      }
+      .high,.low {
+        transform: rotateZ(180deg);
+      }
+      .glow {
+        /*
+          Change the active LED color using these formats
+          https://developer.mozilla.org/en-US/docs/Web/CSS/background-color
+
+          Change the appearance
+          https://developer.mozilla.org/en-US/docs/Web/CSS/box-shadow
+         */
+        box-shadow: 
+        inset 0 0 16px rgb(255, 255, 255),
+        inset 20px 0 80px rgb(0, 225, 255),
+        inset -20px 0 80px #0ff,
+        inset 20px 0 30px rgb(0, 174, 255),
+        inset -20px 0 30px #0ff,
+        0 0 5px #fff,
+        -3px 0 20px rgb(0, 217, 255),
+        3px 0 20px #0ff;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="clock-container">
+      <div id="hours">
+        <div class="high">
+          <div class="bit"></div>
+          <div class="bit"></div>
+        </div>
+        <div class="low">
+          <div class="bit"></div>
+          <div class="bit"></div>
+          <div class="bit"></div>
+          <div class="bit"></div>
+        </div>
+      </div>
+      <div id="minutes">
+        <div class="high">
+          <div class="bit"></div>
+          <div class="bit"></div>
+          <div class="bit"></div>
+        </div>
+        <div class="low">
+          <div class="bit"></div>
+          <div class="bit"></div>
+          <div class="bit"></div>
+          <div class="bit"></div>
+        </div>
+      </div>
+      <div id="seconds">
+        <div class="high">
+          <div class="bit"></div>
+          <div class="bit"></div>
+          <div class="bit"></div>
+        </div>
+        <div class="low">
+          <div class="bit"></div>
+          <div class="bit"></div>
+          <div class="bit"></div>
+          <div class="bit"></div>
+        </div>
+      </div>
+    </div>
+  </body>
+
+  <script>
+    var bit_list = document.querySelectorAll(".bit");
+    var date = null;
+
+    function update_time() {
+      for (var i = 0; i < bit_list.length; ++i) {
+        bit_list[i].classList.remove("glow");
+      }
+      date = new Date;
+
+      var h = date.getHours();
+      var m = date.getMinutes();
+      var s = date.getSeconds();
+
+      var hi = h/10|0;
+      var lo = h%10|0;
+
+      toggle(hi, 0);
+      toggle(lo, 2);
+
+      hi = m/10|0;
+      lo = m%10|0;
+
+      toggle(hi,6);
+      toggle(lo,9);
+
+      hi = s/10|0;
+      lo = s%10|0;
+
+      toggle(hi,13);
+      toggle(lo,16);
+
+    }
+
+    function toggle(n, offset) {
+      var bit = -1;
+      var i = offset;
+      while (n != 0) {
+        if (n&1) {
+          bit_list[i].classList.add("glow");
+        }
+        else {
+          bit_list[i].classList.remove("glow");
+        }
+        n >>= 1;
+        ++i;
+      }
+    }
+
+    /*
+      16 = call every 16ms (AKA 60FPS)
+
+      Get a custom FPS using floor of 1000/[desired FPS]
+      1000/60 = 16.66666... floor of 16.66666... is 16
+
+      NOTE: using 500 and 1000 was inaccurate/behind actual time,
+            therefore i stuck to 60FPS.
+            Fix is to open it exactly on, or extremely near, the second.
+     */
+    setInterval(update_time, 16);
+  </script>
+</html>

@@ -1,0 +1,181 @@
+<!--
+  Author:  happx https://github.com/happ-2h
+  Date:    2022 November 30
+  Purpose: FL Studio dynamic wallpaper - Meteor Shower v1.0.0
+  
+                Copyright conditions
+
+  > You are free to modify the software to your liking.
+  > Redistribute if it has been modified and signed off by the new author,
+    or the software is no longer available by the original author (Copyleft | Abandonware).
+  > Credits to the original author (on any medium or modification) are appreciated but not required.
+    If it has been modified, it is no longer associated with the original author (credits optional).
+  > Free. Not for or part of commercial use.
+-->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+    <meta name="author" content="happx">
+    <meta name="id" content="https://github.com/happ-2h">
+    <meta name="description" content="FL Studio dynamic wallpaper - Meteor Shower">
+
+    <style>
+      * {
+        margin:     0;
+        padding:    0;
+        box-sizing: border-box;
+        overflow:   hidden;
+      }
+    </style>
+  </head>
+
+  <body>
+    <canvas>Canvas not supported</canvas>
+    <noscript>JavaScript disabled or not supported</noscript>
+
+    <script>
+      /****************************
+       *                          *
+       *  User-friendly tweaks!!  *
+       *                          *
+       ****************************/
+      /*
+        Time to spawn a new meteor.
+
+        0   = FPS decides.
+        0.1 = 1/10th of a second.
+        0.5 = 1/2 a second.
+        1   = 1 second.
+
+        NOTE: This value does not noticeably impact performance.
+       */
+      var new_meteor_timer = 0.01;
+      var meteor_color = "rgba(255,255,255,1)"; // Color of meteors. RGBA
+
+      var showFPS = false; // false = turn off FPS display.
+                           // true  = turn on FPS display.
+                           // NOTE: this is FPS for the dynamic wallpaper NOT FL Studio.
+      var font = "32px Consolas"; // Font for FPS.
+                                  // NOTE: you may need to import a non-system font if you plan to change it! [UNTESTED] on IE
+                                  // -> https://stackoverflow.com/questions/2608022/how-can-i-use-custom-fonts-in-an-html5-canvas-element
+                                  // If no fonts work, use Arial.
+      /****************************
+       *          END             *
+       *  User-friendly tweaks!!  *
+       *          END             *
+       ****************************/
+
+      var cnv = null;
+      var ctx = null;
+
+      var meteors = [];
+      function Meteor() {
+        // Initial placement of the meteor. Random in range (Max, Min)
+        this.x = get_rand(cnv.width, 0);     // from 0 to the display's width inclusive.
+        this.y = get_rand(cnv.height>>1, 0); // from 0 to 1/2 the height of the display.
+        this.r = get_rand(9, 2);             // Radius of the meteor. 2 - 9 pixels inclusive.
+
+        // Direction of the meteors.
+        // If vy < vx then it moves at an angle
+        this.vx = 3; // Go n on the x-axis every frame
+        this.vy = 2; // Go n on the y-axis every frame
+        this.v_scalar = get_rand(200, 60); // Scalar to "increase speed." Random in range (Max, Min)
+                                           // initially 60 - 200 pixels per second inclusive
+
+        this.remove = false;
+
+        this.init = function() {}
+
+        this.update = function(dt) {
+          this.x += this.v_scalar * this.vx * dt;
+          this.y += this.v_scalar * this.vy * dt;
+
+          this.r -= 0.1;   // Rate to decrease the radius to appear as if it's dying. N per frame.
+          this.vy += 0.01; // Add gravity for a right-half bell-curve effect. N per frame.
+
+          if (this.r <= 0) this.remove = true;
+        }
+        this.draw = function() {
+          if (!this.remove) {
+            ctx.fillStyle = meteor_color;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.r, 0, 2*Math.PI, false);
+            ctx.fill();
+            ctx.closePath();
+          }
+        }
+      }
+
+      function init() {
+        ctx.font = font.toString();
+        now = performance.now();
+        update(now);
+      }
+
+      var last = 0;
+      var now = 0;
+      var meteor_timer = 0;
+      function update(ts) {
+        last = now;
+        now = ts;
+
+        var dt = (now - last) / 1000;
+
+        meteor_timer += dt;
+        if (meteor_timer >= new_meteor_timer) {
+          meteor_timer = 0;
+          meteors.push(new Meteor);
+        }
+
+        requestAnimationFrame(update);
+
+        for (var i = 0; i < meteors.length; ++i) {
+          meteors[i].update(dt);
+
+          if (meteors[i].remove) meteors.splice(i, 1);
+        }
+
+        render(dt);
+      }
+
+      function render(dt) {
+        // Background color
+        ctx.fillStyle = "rgba(0,0,0,0.3)";
+        ctx.fillRect(0,0,cnv.width,cnv.height); // Adds motion blur. 
+                                                // Remove with '//' if you want to add a background image. Resembles snow.
+        // No motion blur. Remove '//' if adding a background image
+        // ctx.clearRect(0,0,cnv.width,cnv.height);
+
+        for (var i = 0; i < meteors.length; ++i) {
+          meteors[i].draw();
+        }
+
+        if (showFPS) {
+          ctx.fillStyle = "white";
+          ctx.fillText(1/dt, 32, 32);
+        }
+      }
+
+      function get_rand(max, min) {
+        return Math.random() * (max-min) + min;
+      }
+
+      window.onload = function() {
+        cnv = document.querySelector("canvas");
+        cnv.width  = innerWidth;
+        cnv.height = innerHeight;
+        ctx = cnv.getContext('2d');
+
+        init();
+      }
+      window.onresize = function() {
+        cnv.width  = innerWidth;
+        cnv.height = innerHeight;
+      }
+    </script>
+  </body>
+</html>

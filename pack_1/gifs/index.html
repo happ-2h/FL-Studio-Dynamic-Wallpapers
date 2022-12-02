@@ -1,0 +1,67 @@
+<!--
+  Author:  happx https://github.com/happ-2h
+  Date:    2022 November 30
+  Purpose: FL Studio dynamic wallpaper - Use GIF v1.0.0
+  
+                Copyright conditions
+
+  > You are free to modify the software to your liking.
+  > Redistribute if it has been modified and signed off by the new author,
+    or the software is no longer available by the original author (Copyleft | Abandonware).
+  > Credits to the original author (on any medium or modification) are appreciated but not required.
+    If it has been modified, it is no longer associated with the original author (credits optional).
+  > Free. Not for or part of commercial use.
+-->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+    <meta name="author" content="happx">
+    <meta name="id" content="https://github.com/happ-2h">
+    <meta name="description" content="FL Studio dynamic wallpaper - GIF">
+
+    <style>
+      * {
+        margin:     0;
+        padding:    0;
+        box-sizing: border-box;
+        overflow:   hidden;
+      }
+      body {
+        /* Fill the entire screen */
+        width:  100vw;
+        height: 100vh;
+
+        /*
+          You can change the behavior of the positioning with these values.
+          https://developer.mozilla.org/en-US/docs/Web/CSS/background
+         */
+        background: 
+          url(./bkgd2.gif) /* url of image. Can be a http or https link (slower to load).*/
+          no-repeat        /* Do not repeat on x or y axes */
+          center center    /* position x on center and y on center */
+          fixed;           /* Fixed relative to the viewport; no scrolling */
+
+        /*
+          Cover (fill) the container. 
+          Image is scaled to smallest possible size based on its ratio.
+          - Cropping may occur!
+         */
+        background-size: cover;
+
+        /*
+          Provide image scaling algorithm.
+
+          https://developer.mozilla.org/en-US/docs/Web/CSS/image-rendering
+         */
+        image-rendering: smooth;
+      }
+    </style>
+  </head>
+
+  <body>
+  </body>
+</html>

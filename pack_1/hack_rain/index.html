@@ -1,0 +1,169 @@
+<!--
+  Author:  happx https://github.com/happ-2h
+  Date:    2022 November 30
+  Purpose: FL Studio dynamic wallpaper - Hack Rain v1.0.0
+  
+                Copyright conditions
+
+  > You are free to modify the software to your liking.
+  > Redistribute if it has been modified and signed off by the new author,
+    or the software is no longer available by the original author (Copyleft | Abandonware).
+  > Credits to the original author (on any medium or modification) are appreciated but not required.
+    If it has been modified, it is no longer associated with the original author (credits optional).
+  > Free. Not for or part of commercial use.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+    <meta name="author" content="happx">
+    <meta name="id" content="https://github.com/happ-2h">
+    <meta name="description" content="FL Studio dynamic wallpaper - Hack Rain">
+
+    <style>
+      * {
+        margin:          0;
+        padding:         0;
+        box-sizing:      border-box;
+        -ms-user-select: none;
+        user-select:     none;
+        overflow:        hidden;
+      }
+
+      /* Background color can be changed below */
+    </style>
+  </head>
+
+  <body>
+    <canvas>Canvas not supported</canvas>
+    <noscript>JavaScript disabled or not supported</noscript>
+
+    <script>
+      /****************************
+       *                          *
+       *  User-friendly tweaks!!  *
+       *                          *
+       ****************************/
+      // Number of columns
+      var ncols = 50; // Higher number = smaller font and more columns.
+                      // Lower number  = bigger font and less columns.
+                      // NOTE: this value does not noticeably impact performance.
+
+      // Speed which the letters fall. N pixels per second.
+      var lSpeed = 80; // Higher number = faster fall.
+                       // Lower number  = slower fall.
+                       // NOTE: this value does not noticeably impact performance.
+
+      var lColor = "rgba(0,128,0,1)"; // Color of the letters in RGBA format
+
+      var showFPS = false; // false = turn off FPS display.
+                           // true  = turn on FPS display.
+                           // NOTE: this is FPS for the dynamic wallpaper NOT FL Studio.
+
+      /*
+        Change letter font below!
+        YOU MUST CHANGE IT IN 2 DIFFERENT AREAS because the size is dynamically calculated.
+       */
+      /****************************
+       *          END             *
+       *  User-friendly tweaks!!  *
+       *          END             *
+       ****************************/
+      
+      var cnv = null;
+      var ctx = null;
+      
+      var cell_size = 0;
+
+      var letters = [];
+      function Letter() {
+        this.x = Math.random() * ncols;
+        this.y = 0;
+        this.speed = lSpeed;
+        this.remove = false;
+
+        this.update = function(dt) {
+          this.y += this.speed*dt;
+
+          if (this.y*cell_size >= cnv.height) this.remove = true;
+        }
+
+        this.draw = function() {
+          ctx.fillStyle = lColor;
+          // Choose ASCII characters. Initially from 48 to 255 inclusive.
+          // Hiragana is at 0x3041 to 0x3096.
+          // Katakana is at 0x30A1 to 0x30FA.
+          ctx.fillText(String.fromCharCode(Math.random()*255+48|0), this.x*cell_size, this.y*cell_size);
+        }
+      }
+
+      function init() {
+        cell_size = cnv.width / ncols;
+        // Change monospace to your desired font
+        // Other location to change near the bottom
+        ctx.font = "bolder " + cell_size + "px monospace";
+
+        now = performance.now();
+        update(now);
+      }
+
+      var last = 0;
+      var now = 0;
+      function update(ts) {
+        last = now;
+        now = ts;
+
+        var dt = (now-last) / 1000;
+
+        letters.push(new Letter);
+
+        requestAnimationFrame(update);
+
+        for (var i = 0; i < letters.length; ++i) {
+          letters[i].update(dt);
+
+          if (letters[i].remove)letters.splice(i,1);
+        }
+
+        render(dt);
+      }
+
+      function render(dt) {
+        // Change the background color here
+        ctx.fillStyle = "rgba(0,0,0,0.08)";
+        ctx.fillRect(0,0,cnv.width,cnv.height);
+
+        for (var i = 0; i < letters.length; ++i) {
+          letters[i].draw();
+        }
+
+        if (showFPS) {
+          ctx.fillStyle = "white";
+          ctx.fillText(1/dt, 32, 32);
+        }
+      }
+
+
+
+      window.onload = function() {
+        cnv = document.querySelector("canvas");
+        cnv.width = innerWidth;
+        cnv.height = innerHeight;
+        ctx = cnv.getContext("2d");
+
+        init();
+      }
+      window.onresize = function() {
+        cnv.width = innerWidth;
+        cnv.height = innerHeight;
+        cell_size = cnv.width / ncols;
+
+        // Change monospace to your desired font
+        ctx.font = "bolder " + cell_size + "px monospace";
+      }
+    </script>
+  </body>
+</html>

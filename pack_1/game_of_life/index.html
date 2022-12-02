@@ -1,0 +1,281 @@
+<!--
+  Author:  happx https://github.com/happ-2h
+  Date:    2022 November 30
+  Purpose: FL Studio dynamic wallpaper - Conway's Game of Life v1.0.0
+
+  Credits:
+    https://www.youtube.com/watch?v=E7CxMHsYzSs&ab_channel=javidx9
+
+
+                Controls (can be changed below)
+    - You must have focus on the wallpaper for controls to work -
+  Spacebar   = pause animation
+  c          = clear the grid
+  left-click = while paused:
+               blank area    => adds cell
+               occupied area => removes cell
+  
+
+                Copyright conditions
+
+  > You are free to modify the software to your liking.
+  > Redistribute if it has been modified and signed off by the new author,
+    or the software is no longer available by the original author (Copyleft | Abandonware).
+  > Credits to the original author (on any medium or modification) are appreciated but not required.
+    If it has been modified, it is no longer associated with the original author (credits optional).
+  > Free. Not for or part of commercial use.
+-->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+    <meta name="author" content="happx">
+    <meta name="id" content="https://github.com/happ-2h">
+    <meta name="description" content="FL Studio dynamic wallpaper - Conway's Game of Life">
+
+    <style>
+      * {
+        margin:     0;
+        padding:    0;
+        box-sizing: border-box;
+        overflow:   hidden;
+      }
+      body {
+        width:  100vw;
+        height: 100vh;
+        background: black;
+      }
+    </style>
+  </head>
+
+  <body>
+    <canvas>Canvas not supported</canvas>
+  </body>
+
+  <script>
+    /****************************
+     *                          *
+     *  User-friendly tweaks!!  *
+     *                          *
+     ****************************/
+    /*
+      Speed of the animation.
+
+      0   = let FPS decide
+      0.1 = 1/10th of a second
+      0.5 = 1/2 a second
+      1   = 1 second
+
+      NOTE:
+        Value does not appear to impact performance.
+     */
+    var delay = 0.1;
+
+    var motion_blur = true; // true  = motion blur on
+                            // false = motion blur off
+
+    var rainbow = true; // true  = random colored cell
+                        // false = solid colored cell
+
+    // NOTE: only matters if rainbow is set to false
+    var cell_color = "rgba(255,255,255,1)"; // Default white (255, 255, 255, 1)
+
+    var showFPS = false; // true = show FPS
+                        // false = don't show FPS
+                        // NOTE: FPS of the dynamic wallpaper NOT FL Studio
+    var font = "32px Consolas"; // Font for FPS.
+                                // NOTE: you may need to import a non-system font if you plan to change it! [UNTESTED] on IE
+                                // -> https://stackoverflow.com/questions/2608022/how-can-i-use-custom-fonts-in-an-html5-canvas-element
+                                // If no fonts work, use Arial.
+    /****************************
+     *          END             *
+     *  User-friendly tweaks!!  *
+     *          END             *
+     ****************************/
+
+    var cnv = null;
+    var ctx = null;
+
+    var curr = null;
+    var next = null;
+
+    var W = innerWidth>>3;
+    var H = innerHeight>>3;
+
+    var keydown = false;
+    var mouse = {x:0,y:0};
+
+    function init() {
+      ctx.font = font.toString();
+      window.onkeydown = function(e) {
+        /*
+          Spacebar (32) = pause button
+
+          Change it using the keyCode provided by this webpage
+          https://www.toptal.com/developers/keycode
+         */
+        if (!keydown && e.keyCode == 32) {
+          paused = !paused;
+          keydown = true;
+        }
+        /*
+          c (67) = clear grid
+
+          Change it using the keyCode provided by this webpage
+          https://www.toptal.com/developers/keycode
+         */
+        else if (!keydown && e.keyCode == 67) {
+          for (var i = 0; i < W*H; ++i) {
+            next[i] = 0;
+          }
+          keydown = true;
+        }
+      }
+      window.onkeyup = function(e) {
+        keydown = false;
+      }
+      window.onmousemove = function(e) {
+        if (!paused) return;
+        var rect = cnv.getBoundingClientRect();
+        var mx = e.clientX - rect.left>>3;
+        var my = e.clientY - rect.top>>3;
+
+        mouse.x = mx;
+        mouse.y = my;
+      }
+      window.onmousedown = function(e) {
+        if (!paused) return;
+        var rect = cnv.getBoundingClientRect();
+        var mx = e.clientX - rect.left>>3;
+        var my = e.clientY - rect.top>>3;
+
+        console.log(mx, my);
+
+        if (mx >= 0 && mx < W && my >= 0 && my < H)
+          next[my*W+mx] ^= 1;
+      }
+
+      curr = [];
+      next = [];
+
+      for (var i = 0; i < W*H; ++i) {
+        /*
+          Randomly fill the grid.
+
+          Change to next[i] = 0; 
+          to start with an empty grid.
+         */
+        next[i] = Math.random()*2|0;
+        curr[i] = next[i];
+      }
+
+      now = performance.now();
+      update(now);
+    }
+
+    var last = 0;
+    var now = 0;
+    var timer = 0;
+    var paused = false;
+    function update(ts) {
+      last = now;
+      now = ts;
+
+      var dt = (now - last) / 1000;
+
+      requestAnimationFrame(update);
+
+      for (var i = 0; i < W*H; ++i) {
+        curr[i] = next[i];
+      }
+
+      if (!paused) {
+        timer += dt;
+        if (timer >= delay) {
+          timer = 0;
+          
+          for (var x = 0; x < W; ++x) {
+            for (var y = 0; y < H; ++y) {
+              /*
+                You can change the rules of the game here.
+               */
+              var state = 
+                get_tile(x-1,y-1)+get_tile(x,y-1)+get_tile(x+1,y-1)+
+                get_tile(x-1,y)+0+get_tile(x+1,y)+
+                get_tile(x-1,y+1)+get_tile(x,y+1)+get_tile(x+1,y+1);
+
+              if (get_tile(x,y)) {
+                next[y*W+x] = state == 2 || state == 3;
+              }
+              else {
+                next[y*W+x] = state == 3;
+              }
+            }
+          }
+        }
+      }
+
+      render(dt);
+    }
+
+    function render(dt) {
+      ctx.fillStyle = motion_blur ? "rgba(0,0,0,0.2)" : "black";
+      if (!motion_blur) {
+        ctx.clearRect(0,0,cnv.width,cnv.height);
+      }
+      ctx.fillRect(0,0,cnv.width,cnv.height);
+
+
+      for (var i = 0; i < W*H; ++i) {
+        var x = i%W|0;
+        var y = i/W|0;
+        if (get_tile(x,y)) {
+          ctx.fillStyle = 
+            rainbow ?
+              "rgba("+(Math.random()*255|0)+","+(Math.random()*255|0)+","+(Math.random()*255|0)+","+1+")"
+              : cell_color.toString(); 
+          ctx.fillRect(x<<3, y<<3, 8, 8);
+        }
+      }
+
+      if (paused) {
+        ctx.fillStyle = 
+          rainbow ?
+            "rgba("+(Math.random()*255|0)+","+(Math.random()*255|0)+","+(Math.random()*255|0)+","+1+")"
+            : cell_color.toString(); 
+        ctx.fillRect(mouse.x<<3, mouse.y<<3, 8, 8);
+      }
+
+      if (showFPS) {
+        ctx.fillStyle = "white";
+        ctx.fillText(1/dt, 32, 32);
+      }
+    }
+
+    function get_tile(x, y) {
+      x |= 0;
+      y |= 0;
+      if (x >= 0 && x < W && y >= 0 && y < H)
+        return curr[y*W+x];
+      return 0;
+    }
+
+    window.onload = function() {
+      cnv = document.querySelector("canvas");
+      cnv.width  = W<<3;
+      cnv.height = H<<3;
+      ctx = cnv.getContext("2d");
+
+      init();
+    }
+    window.onresize = function() {
+      W = innerWidth>>3;
+      H = innerHeight>>3;
+      cnv.width  = W<<3;
+      cnv.height = H<<3;
+    }
+  </script>
+</html>

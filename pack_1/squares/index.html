@@ -1,0 +1,185 @@
+<!--
+  Author:  happx https://github.com/happ-2h
+  Date:    2022 November 30
+  Purpose: FL Studio dynamic wallpaper - Animated Squares v1.0.0
+
+  credit: 
+    https://daily-dev-tips.com/posts/css-keyframe-animation-floating-blocks/
+  
+                Copyright conditions
+                
+  > You are free to modify the software to your liking.
+  > Redistribute if it has been modified and signed off by the new author,
+    or the software is no longer available by the original author (Copyleft | Abandonware).
+  > Credits to the original author (on any medium or modification) are appreciated but not required.
+    If it has been modified, it is no longer associated with the original author (credits optional).
+  > Free. Not for or part of commercial use.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+    <meta name="author" content="happx">
+    <meta name="id" content="https://github.com/happ-2h">
+    <meta name="description" content="FL Studio dynamic wallpaper - Animated Squares">
+
+    <style>
+      * {
+        margin:          0;
+        padding:         0;
+        box-sizing:      border-box;
+        -ms-user-select: none;
+        user-select:     none;
+      }
+      body {
+        width:  100vw;
+        height: 100vh;
+
+        /*
+          Change the background color using these formats
+          https://developer.mozilla.org/en-US/docs/Web/CSS/background-color
+         */
+        background: #192333;
+      }
+      .sqrs {
+        position: absolute;
+        top:        0;
+        left:       0;
+        width:    100vw;
+        height:   100vh;
+        overflow: hidden;
+      }
+      .sqrs li {
+        position:   absolute;
+        list-style: none;
+
+        /*
+          Change the square's color using these formats
+          https://developer.mozilla.org/en-US/docs/Web/CSS/background-color
+         */
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px; /* Rounded corners */
+        /*
+          Change the square's border color using these formats
+          https://developer.mozilla.org/en-US/docs/Web/CSS/background-color
+         */
+        border: 1px solid rgba(255, 255, 255, 0.18);
+         /*
+           Change the animation behavior
+           https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Animations/Using_CSS_animations
+          */
+        animation: rise_spin 5s linear infinite;
+        bottom: -120px;
+      }
+      .sqrs li:nth-child(1) {
+        left:    8%;             /* Push the square n% from the left (relative to width of the webpage). */
+        width:  16px;            /* Width of the square */
+        height: 16px;            /* Height of the square */
+        animation-delay: 0s;     /* Wait n seconds to start */
+      }
+      .sqrs li:nth-child(2) {
+        left:   16%;             /* Push the square n% from the left (relative to width of the webpage). */
+        width:  50px;            /* Width of the square */
+        height: 50px;            /* Height of the square */
+        animation-delay:     2s; /* Wait n seconds to start */
+        animation-duration: 12s; /* Take n seconds to finish the animation (reach the "top") */
+      }
+      .sqrs li:nth-child(3) {
+        left:    24%;            /* Push the square n% from the left (relative to width of the webpage). */
+        width:  120px;           /* Width of the square */
+        height: 120px;           /* Height of the square */
+        animation-delay: 4s;     /* Wait n seconds to start */
+      }
+      .sqrs li:nth-child(4) {
+        left:   38%;             /* Push the square n% from the left (relative to width of the webpage). */
+        width:  80px;            /* Width of the square */
+        height: 80px;            /* Height of the square */
+        animation-delay:     0s; /* Wait n seconds to start */
+        animation-duration: 18s; /* Take n seconds to finish the animation (reach the "top") */
+      }
+      .sqrs li:nth-child(5) {
+        left:   48%;             /* Push the square n% from the left (relative to width of the webpage). */
+        width:  60px;            /* Width of the square */
+        height: 60px;            /* Height of the square */
+        animation-delay: 0s;     /* Wait n seconds to start */
+      }
+      .sqrs li:nth-child(6) {
+        left:   60%;             /* Push the square n% from the left (relative to width of the webpage). */
+        width:  20px;            /* Width of the square */
+        height: 20px;            /* Height of the square */
+        animation-delay: 3s;     /* Wait n seconds to start */
+      }
+      .sqrs li:nth-child(7) {
+        left:    65%;            /* Push the square n% from the left (relative to width of the webpage). */
+        width:  120px;           /* Width of the square */
+        height: 120px;           /* Height of the square */
+        animation-delay: 7s;     /* Wait n seconds to start */
+      }
+      .sqrs li:nth-child(8) {
+        left:   72%;             /* Push the square n% from the left (relative to width of the webpage). */
+        width:  80px;            /* Width of the square */
+        height: 80px;            /* Height of the square */
+        animation-delay:    15s; /* Wait n seconds to start */
+        animation-duration: 45s; /* Take n seconds to finish the animation (reach the "top") */
+      }
+      .sqrs li:nth-child(9) {
+        left:   80%;             /* Push the square n% from the left (relative to width of the webpage). */
+        width:  64px;            /* Width of the square */
+        height: 64px;            /* Height of the square */
+        animation-delay:     2s; /* Wait n seconds to start */
+        animation-duration: 35s; /* Take n seconds to finish the animation (reach the "top") */
+      }
+      .sqrs li:nth-child(10) {
+        left:    85%;            /* Push the square n% from the left (relative to width of the webpage). */
+        width:  120px;           /* Width of the square */
+        height: 120px;           /* Height of the square */
+        animation-delay:     0s; /* Wait n seconds to start */
+        animation-duration: 11s; /* Take n seconds to finish the animation (reach the "top") */
+      }
+
+      @keyframes rise_spin {
+        /*
+           At the start of the animation...
+         */
+        0% {
+          
+          transform: translateY(0) rotate(0deg); /* Keep the square upright */
+          border-radius: 0;                      /* Hard angled borders */
+          opacity: 1;                            /* Full opacity */
+        }
+        /*
+          At the end of the animation...
+         */
+        100% {
+          transform: translateY(-1080px) rotate(720deg); /* The square reached -1080px from its starting point */
+                                                         /* and has rotated a full 720 degrees in between */
+          border-radius: 50%;                            /* Makes the borders curve to make squares circular */
+          opacity: 0;                                    /* No opacity AKA invisible */
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Number of squares -->
+    <!--
+      NOTE: if you add a square, you must add its properties above (placement, size, animation properties).
+      .sqrs li:nth-child(<placement in the list>) {}
+    -->
+    <ul class="sqrs">
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+    </ul>
+  </body>
+</html>

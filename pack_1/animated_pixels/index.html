@@ -1,0 +1,148 @@
+<!--
+  Author:  happx https://github.com/happ-2h
+  Date:    2022 November 30
+  Purpose: FL Studio dynamic wallpaper - Animated Pixels v1.0.0
+  
+                Copyright conditions
+
+  > You are free to modify the software to your liking.
+  > Redistribute if it has been modified and signed off by the new author,
+    or the software is no longer available by the original author (Copyleft | Abandonware).
+  > Credits to the original author (on any medium or modification) are appreciated but not required.
+    If it has been modified, it is no longer associated with the original author (credits optional).
+  > Free. Not for or part of commercial use.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+    <meta name="author" content="happx">
+    <meta name="id" content="https://github.com/happ-2h">
+    <meta name="description" content="FL Studio dynamic wallpaper - Animated Pixels">
+
+    <style>
+      * {
+        margin:  0;
+        padding: 0;
+        box-sizing:      border-box;
+        -ms-user-select: none;
+        user-select:     none;
+        overflow:        hidden;
+      }
+      body {
+        /*
+          Change the background color using these formats
+          https://developer.mozilla.org/en-US/docs/Web/CSS/background-color
+         */
+        background-color: #112;
+      }
+    </style>
+  </head>
+
+  <body>
+    <canvas></canvas>
+
+    <script>
+      /****************************
+       *                          *
+       *  User-friendly tweaks!!  *
+       *                          *
+       ****************************/
+      var resolution = 8; // Smaller number = higher resolution.
+                          // Higher resolution = slower FPS/performance.
+                          // NOTE: higher resolutions leave bigger voids.
+
+      var showFPS = false; // false = turn off FPS display.
+                           // true  = turn on FPS display.
+                           // NOTE: this is FPS for the dynamic wallpaper NOT FL Studio.
+      var font = "32px Consolas"; // Font for FPS.
+                                  // NOTE: you may need to import a non-system font if you plan to change it! [UNTESTED] on IE
+                                  // -> https://stackoverflow.com/questions/2608022/how-can-i-use-custom-fonts-in-an-html5-canvas-element
+                                  // If no fonts work, use Arial.
+
+      var speed = 500; // Speed of animation.
+                       // NOTE: I recommend keeping it at 50+ as anything lower can cause undesired results.
+                       // NOTE: I have not experienced any performance boosts or losses in changing this value.
+
+      /*
+        You can change the behavior of the wallpaper
+        and make it your own with mathematical equations!
+        Explained below.
+       */
+      /****************************
+       *          END             *
+       *  User-friendly tweaks!!  *
+       *          END             *
+       ****************************/
+
+      var cnv = null;
+      var ctx = null;
+
+      function init() {
+        ctx.font = font.toString();
+        now = performance.now();
+        update(now);
+      }
+
+      var last = 0;
+      var now = 0;
+      function update(ts) {
+        last = now;
+        now = ts;
+        var dt = (now-last) / 1000;
+
+        requestAnimationFrame(update);
+
+        render(dt);
+      }
+
+      function render(dt) {
+        ctx.clearRect(0,0,cnv.width,cnv.height);
+
+        var img = ctx.getImageData(0,0,cnv.width,cnv.height);
+        var t = Date.now()/speed;
+
+        for (var x = 0; x < cnv.width; x+=resolution) {
+          for (var y = 0; y < cnv.height; y+=resolution) {
+            var i = 4 * (y*cnv.width + x);
+            /*
+              Use different values, equations, etc. to change the behavior.
+              50 and 255 represent the amount of color to use. Range 0 - 255 inclusive.
+              Red is 50 so it wont be as prominent as green or blue.
+
+              These are random equations I played around with.
+             */
+            img.data[i]   =  50*(Math.sin(x*x+t)*2);            // Red
+            img.data[i+1] = 255*(Math.sin(y/cnv.width+t));      // Green
+            img.data[i+2] = 255*(Math.cos(x*y/cnv.height+t)*4); // Blue
+            img.data[i+3] = 255;                                // Alpha
+          }
+        }
+
+        ctx.putImageData(img, 0, 0);
+
+        if (showFPS) {
+          ctx.fillStyle = "white"; // Color of FPS font
+          ctx.fillText(1/dt, 32, 32);
+        }
+      }
+
+      window.onload = function() {
+        cnv = document.querySelector("canvas");
+        cnv.width = innerWidth;
+        cnv.height = innerHeight;
+        ctx = cnv.getContext("2d");
+
+        init();
+      }
+
+      window.onresize = function() {
+        cnv.width  = innerWidth;
+        cnv.height = innerHeight;
+      }
+    </script>
+  </body>
+</html>

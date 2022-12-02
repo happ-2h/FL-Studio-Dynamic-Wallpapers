@@ -1,0 +1,237 @@
+<!--
+  Author:  happx https://github.com/happ-2h
+  Date:    2022 November 30
+  Purpose: FL Studio dynamic wallpaper - Animated Rain v1.0.0
+  
+                Copyright conditions
+
+  > You are free to modify the software to your liking.
+  > Redistribute if it has been modified and signed off by the new author,
+    or the software is no longer available by the original author (Copyleft | Abandonware).
+  > Credits to the original author (on any medium or modification) are appreciated but not required.
+    If it has been modified, it is no longer associated with the original author (credits optional).
+  > Free. Not for or part of commercial use.
+-->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+    <meta name="author" content="happx">
+    <meta name="id" content="https://github.com/happ-2h">
+    <meta name="description" content="FL Studio dynamic wallpaper - Animated Rain">
+
+    <style>
+      * {
+        margin:     0;
+        padding:    0;
+        box-sizing: border-box;
+        overflow:   hidden;
+    
+        /* Size and Font of the clock */
+        font: 2.6rem "Consolas";
+      }
+      body {
+        width:  100vw;
+        height: 100vh;
+    
+        /*
+          You can change the behavior of the positioning with these values.
+          https://developer.mozilla.org/en-US/docs/Web/CSS/background
+         */
+        background-image:    url(./bkgd.jpg); /* Link to image */
+        background-size:     cover;           /* Cover the entire webpage. Cropping may occur. */
+        background-repeat:   no-repeat;       /* Do not repeat on x or y axes */
+        background-position: center center;   /* Center on x and y axes */
+      }
+      .time-container {
+        user-select: none;
+        position:    absolute;
+
+        /* right and bottom also exist! */
+        top:  10%; /* Push the clock 10% from top */
+        left: 50%; /* Push the clock 50% from left. For centering */
+        transform: translate(-50%, -50%); /* For centering */
+    
+        color: aliceblue; /* Font color */
+        /*box-shadow: 0 0 32px 2px black;*/ /* Makes the clock stand out */
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="time-container">
+      <div id="hour">FAILED</div>
+      <div id="min">FAILED</div>
+    </div>
+    <canvas>Canvas not supported</canvas>
+    <noscript>JavaScript disabled or not supported</noscript>
+
+    <script>
+      /****************************
+       *                          *
+       *  User-friendly tweaks!!  *
+       *                          *
+       ****************************/
+      var drop_color = "rgba(255,255,255,1)"; // Raindrop color in RGBA
+      var nDrops = 100; // Number of drops
+                        // High numbers impact performance.
+
+      var showFPS = false; // false = turn off FPS display.
+                           // true  = turn on FPS display.
+                           // NOTE: this is FPS for the dynamic wallpaper NOT FL Studio.
+      var font = "32px Consolas"; // Font for FPS.
+                                  // NOTE: you may need to import a non-system font if you plan to change it! [UNTESTED] on IE
+                                  // -> https://stackoverflow.com/questions/2608022/how-can-i-use-custom-fonts-in-an-html5-canvas-element
+                                  // If no fonts work, use Arial.
+      /****************************
+       *          END             *
+       *  User-friendly tweaks!!  *
+       *          END             *
+       ****************************/
+
+      var cnv = null;
+      var ctx = null;
+    
+      var droplets = [];
+      function Droplet(x,y) {
+        this.x = x;
+        this.y = y;
+    
+        this.vx = 0;
+        this.vy = 0;
+        this.g  = 0;
+    
+        this.particles = [];
+        this.exploding = false;
+    
+        this.init = function() {
+          this.x = Math.random() * cnv.width;
+          this.g = 12 + Math.random() * 20; // Randomly choose from 12 - 20 for the fall speed.
+          this.vy = 0;
+          this.y = -this.r<<1; // Place droplets away from viewing area (above y axis).
+
+          this.exploding = false;
+        }
+    
+        this.update = function(dt) {
+          this.vy += this.g * dt;
+          this.y += this.vy;
+          if (this.y >= cnv.height) {
+            this.explode();
+            this.init();
+          }
+        }
+    
+        this.explode = function() {
+          for (var i = 0; i < 10; ++i) {
+            explosions.push(new Particle(this.x, cnv.height));
+          }
+        }
+    
+        this.draw = function() {
+          ctx.fillStyle = drop_color.toString();
+          ctx.fillRect(this.x, this.y, 2, 10); // x, y, WIDTH (changeable), HEIGHT (changeable)
+        }
+      }
+    
+      var explosions = [];
+      function Particle(x, y) {
+        this.x = x;
+        this.y = y;
+        this.r = 2; // Radius of particle
+    
+        // Angles to fly at (full 2*PI). Scalar can be changed (the 100 or 200 in this case).
+        // Angle (Math.random() * 6.3) can be changed with mathematics or constants as well.
+        this.dx = 100 * Math.sin(Math.random() * 6.3);
+        this.dy = 200 * Math.cos(Math.random() * 6.3);
+    
+        this.life = 100; // Frames to kill off particles.
+    
+        this.update = function(dt) {
+          this.x += this.dx * dt;
+          this.y += this.dy * dt;
+          this.dy += 4; // Gravity strength
+          --this.life;
+        }
+        this.draw = function() {
+          // Drop color. Visually recommended to keep alpha at 0.3.
+          ctx.fillStyle = "rgba(255,255,255,0.3)";
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.r, 0, 2*Math.PI, false);
+          ctx.fill();
+          ctx.closePath();
+        }
+      }
+    
+      function init() {
+        ctx.font = font.toString();
+        for (var i = 0; i < nDrops; ++i) {
+          droplets[i] = new Droplet();
+          droplets[i].init();
+        }
+        now = performance.now();
+        update(now);
+      }
+    
+      var last = 0;
+      var now = 0;
+      function update(ts) {
+        last = now;
+        now = ts;
+        var dt = (now-last) / 1000;
+    
+        for (var i = 0; i < droplets.length; ++i) {
+          droplets[i].update(dt);
+        }
+        for (var i = 0; i < explosions.length; ++i) {
+          explosions[i].update(dt);
+    
+          if (explosions[i].life <= 0) {
+            explosions.splice(i, 1);
+          }
+        }
+    
+        var date = new Date();
+        document.querySelector("#hour").innerText = ('0' + date.getHours()).slice(-2);
+        document.querySelector("#min").innerText = ('0' + date.getMinutes()).slice(-2);
+    
+        requestAnimationFrame(update);
+        render(dt);
+      }
+    
+      function render(dt) {
+        ctx.clearRect(0,0,cnv.width,cnv.height);
+    
+        for (var i = 0; i < droplets.length; ++i) {
+          droplets[i].draw();
+        }
+        for (var i = 0; i < explosions.length; ++i) {
+          explosions[i].draw();
+        }
+
+        if (showFPS) {
+          ctx.fillStyle = "white"
+          ctx.fillText(1/dt, 32, 32);
+        }
+      }
+    
+      window.onload = function() {
+        cnv = document.querySelector("canvas");
+        cnv.width = innerWidth;
+        cnv.height = innerHeight;
+    
+        ctx = cnv.getContext('2d');
+    
+        init();
+      }
+    
+      window.onresize = function() {
+        cnv.width = innerWidth;
+        cnv.height = innerHeight;
+      }
+    </script>
+  </body>
+</html>
